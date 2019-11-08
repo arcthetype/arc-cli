@@ -3,7 +3,6 @@
 const program = require('commander');
 const Creator = require('../src/creator');
 
-
 program
   .option('--name [name]', '名称')
   .option('--description [description]', '介绍')
@@ -16,8 +15,3 @@ const { name, description, author, template } = program;
 const creator = new Creator({ name, description, author, template });
 
 creator.create();
-
-
-
-
-

@@ -1,42 +1,62 @@
-const inquirer = require('inquirer');
-const fs = require('fs');
+const inquirer = require('inquirer')
+const symbols = require('log-symbols')
+const chalk = require('chalk')
+const fs = require('fs-extra')
+const ora = require('ora')
+const path = require('path')
+const repo = require('../../utils/repository')
+const cfg = require('../../utils/cfg-tools')
+const getUserHomeDir = require('../../utils').getUserHomeDir
+const config = require('../../config')
 
 /**
  * 创建工程的类
  */
 class Creator {
 
-  constructor({ name, description, author, template }) {
+  constructor({ name, description, author, template, root }) {
+    /**
+     * 项目根目录
+     * @type {String}
+     * @private
+     */
+    this._root = root
     /**
      * 项目名称
      * @type {String}
      * @private
      */
-    this._name = name;
+    this._name = name
     /**
      * 项目描述
      * @type {String}
      * @private
      */
-    this._description = description;
+    this._description = description
     /**
      * 作者
      * @type {String}
      * @private
      */
-    this._author = author;
+    this._author = author
     /**
      * 模板类型
      * @type {String}
      * @private
      */
-    this._template = template;
+    this._template = template
+    /**
+     * 模板源
+     * @type {String}
+     * @private
+     */
+    this._templateSource = 'default'
     /**
      * 用于询问的列表
      * @type {Array}
      * @private
      */
-    this._ask = [];
+    this._ask = []
   }
 
   /**
@@ -53,13 +73,13 @@ class Creator {
         message: '请输入项目名称',
         validate(input) {
           if (!input) {
-            return '项目名不能为空！';
+            return '项目名不能为空！'
           }
           if (fs.existsSync(input)) {
-            return '已经存在同名项目，请换一个项目名！';
+            return '已经存在同名项目，请换一个项目名！'
           }
-          _this._name = input;
-          return true;
+          _this._name = input
+          return true
         }
       })
     } else if (fs.existsSync(this._name)) {
@@ -69,13 +89,13 @@ class Creator {
         message: '已经存在同名项目，请换一个项目名',
         validate(input) {
           if (!input) {
-            return '项目名不能为空！';
+            return '项目名不能为空！'
           }
           if (fs.existsSync(input)) {
-            return '依旧重复，请再换一个项目名！';
+            return '依旧重复，请再换一个项目名！'
           }
-          _this._name = input;
-          return true;
+          _this._name = input
+          return true
         }
       })
     }
@@ -128,7 +148,7 @@ class Creator {
         name: 'weapp',
         value: 'archetype-weapp'
       }
-    ];
+    ]
     this._ask.push({
       type: 'list',
       name: 'template',
@@ -141,7 +161,7 @@ class Creator {
    * 询问模板源
    */
   askSource() {
-    const typeChoices = ['default', 'remote'];
+    const typeChoices = ['default', 'remote']
     this._ask.push({
       type: 'list',
       name: 'templateSources',
@@ -153,24 +173,58 @@ class Creator {
   /**
    * 创建
    */
-  create() {
-    this.clollectAsk().then(res => {
+  async create() {
+    try {
+      const { projectName, description, author, template, templateSources } =  await this.clollectAsk()
+      typeof projectName !== 'undefined' && (this._name = projectName)
+      typeof description !== 'undefined' && (this._description = description )
+      typeof author !== 'undefined' && (this._author = author)
+      typeof templateSources !== 'undefined' && (this._templateSource = templateSources)
+      typeof template !== 'undefined' && (this._template = template)
+      if (this._templateSource !== 'default') {
+        let repoUrl = await cfg.getGlobalConfig(config.GIT_REPO_URL_KEY)
+        if (repoUrl) {
+          this.downloadTemplate(repoUrl)
+        } else {
+          console.log(symbols.error, chalk.red(config.configErrorEnum.NOT_FOUND_KEY))
+        }
+      }
+    } catch(err) {
+      console.log(symbols.error, chalk.red(err.message))
+    }
+  }
 
-    })
+  /**
+   * 下载远程模板
+   */
+  async downloadTemplate(repoUrl) {
+    let des = path.resolve(getUserHomeDir(), config.CODE_DEST_URL)
+    const spinner = ora('开始下载模板').start()
+    try {
+      fs.ensureDirSync(des)
+      let isSuccess = await repo.getGitCode(repoUrl, des, { clone: false })
+      if (isSuccess) {
+        spinner.succeed('下载完成').stop()
+      }
+    } catch(e) {
+      spinner.stop()
+      console.log(symbols.error, chalk.red('下载模板失败'))
+      process.exit(0)
+    }
   }
 
   /**
    * 收集询问
    */
   clollectAsk() {
-    this.askProjectName();
-    this.askDescription();
-    this.askAuthor();
-    this.askTemplate();
-    this.askSource();
-    return inquirer.prompt(this._ask);
+    this.askProjectName()
+    this.askDescription()
+    this.askAuthor()
+    this.askSource()
+    this.askTemplate()
+    return inquirer.prompt(this._ask)
   }
 
 }
 
-module.exports = Creator;
+module.exports = Creator

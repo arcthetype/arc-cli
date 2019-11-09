@@ -1,14 +1,14 @@
-const pkg = require('../package.json');
-const chalk = require('chalk');
-const os = require('os');
-const fs = require('fs-extra');
+const pkg = require('../package.json')
+const chalk = require('chalk')
+const os = require('os')
+const fs = require('fs-extra')
 
 /**
  * 获取版本号
  */
 const getPkgVersion = () => {
   return pkg.version
-};
+}
 
 /**
  * 获取用户主目录
@@ -32,7 +32,7 @@ const homedir = () => {
   }
 
   return home || ''
-};
+}
 
 /**
  * 获取用户主目录
@@ -40,7 +40,7 @@ const homedir = () => {
  */
 const getUserHomeDir  = () => {
   return typeof os.homedir === 'function' ? os.homedir() : homedir()
-};
+}
 
 /**
  * 判断是否存在主目录
@@ -48,10 +48,10 @@ const getUserHomeDir  = () => {
  */
 const isExistHomeDir = () => {
   return fs.existsSync(getUserHomeDir())
-};
+}
 
 module.exports = {
   getPkgVersion,
   getUserHomeDir,
   isExistHomeDir
-};
+}

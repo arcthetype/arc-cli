@@ -1,1 +1,1 @@
-module.exports = require('./src/creator');
+module.exports = require('./src/creator')

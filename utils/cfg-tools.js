@@ -17,7 +17,10 @@ const getGlobalConfig = (key, isAll = false) => {
   return new Promise((resolve, reject) => {
     try {
       if (!isExistHomeDir()) reject(new Error(configErrorEnum.NOT_FOUND_HOME))
-      if (!fs.existsSync(globalFilePath)) reject(new Error(configErrorEnum.NOT_FOUND_CONFIG))
+      if (!fs.existsSync(globalFilePath)) {
+        // console.log(symbols.error, chalk.red(configErrorEnum.NOT_FOUND_CONFIG))
+        resolve()
+      }
       let globalConfig = fs.readJSONSync(globalFilePath)
       if (!isAll) {
         resolve(globalConfig[key])
@@ -47,7 +50,7 @@ const setGlobalConfig = (key, value) => {
         // 确保有配置文件
         fs.ensureFileSync(globalFilePath)
         fs.writeJSONSync(globalFilePath, {
-            [key]: value
+          [key]: value
         })
       }
       resolve()

@@ -26,7 +26,14 @@ const GIT_REPO_URL_KEY = 'repo'
  */
 const CODE_DEST_URL = '.archetype/remote'
 
+/**
+ * 默认的模板源 
+ * 托管平台::api_host::组或组织名::private_token
+ */
+const DEFAULT_TEMPLATE = 'github::https://api.github.com::arcthetype'
+
 module.exports.configErrorEnum = configErrorEnum
 module.exports.HOME_CONFIG_DIR = HOME_CONFIG_DIR
 module.exports.GIT_REPO_URL_KEY = GIT_REPO_URL_KEY
 module.exports.CODE_DEST_URL = CODE_DEST_URL
+module.exports.DEFAULT_TEMPLATE = DEFAULT_TEMPLATE

@@ -1,5 +1,5 @@
 {
-  "name": "archetype-vue",
+  "name": "arc-cli",
   "version": "1.0.0",
   "description": "create a vue project quickly",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/HRDVV/archetype-vue.git"
+    "url": "git+https://github.com/HRDVV/arc-cli.git"
   },
   "keywords": [
     "vue",
@@ -20,9 +20,9 @@
   "author": "HRDVV",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/HRDVV/archetype-vue/issues"
+    "url": "https://github.com/HRDVV/arc-cli/issues"
   },
-  "homepage": "https://github.com/HRDVV/archetype-vue#readme",
+  "homepage": "https://github.com/HRDVV/arc-cli#readme",
   "dependencies": {
     "chalk": "^2.4.2",
     "commander": "^4.0.0",
@@ -31,6 +31,7 @@
     "fs-extra": "^8.1.0",
     "inquirer": "^7.0.0",
     "log-symbols": "^3.0.0",
-    "ora": "^4.0.2"
+    "ora": "^4.0.2",
+    "request": "^2.88.0"
   }
 }

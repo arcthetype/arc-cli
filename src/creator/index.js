@@ -4,10 +4,10 @@ const chalk = require('chalk')
 const fs = require('fs-extra')
 const ora = require('ora')
 const path = require('path')
-const repo = require('../../utils/repository')
 const cfg = require('../../utils/cfg-tools')
-const getUserHomeDir = require('../../utils').getUserHomeDir
+const { getUserHomeDir } = require('../../utils')
 const config = require('../../config')
+const repo = require('../../utils/repository')
 
 /**
  * 创建工程的类
@@ -45,12 +45,6 @@ class Creator {
      * @private
      */
     this._template = template
-    /**
-     * 模板源
-     * @type {String}
-     * @private
-     */
-    this._templateSource = 'default'
     /**
      * 用于询问的列表
      * @type {Array}
@@ -130,7 +124,8 @@ class Creator {
   /**
    * 询问模板
    */
-  askTemplate() {
+  async askTemplate() {
+    
     const typeChoices = [
       {
         name: 'vue-pc',
@@ -152,7 +147,7 @@ class Creator {
     this._ask.push({
       type: 'list',
       name: 'template',
-      message: '请选择项目类型(vue/vue-admin/weapp)',
+      message: '请选择项目模板',
       choices: typeChoices
     })
   }
@@ -160,35 +155,28 @@ class Creator {
   /**
    * 询问模板源
    */
-  askSource() {
-    const typeChoices = ['default', 'remote']
-    this._ask.push({
-      type: 'list',
-      name: 'templateSources',
-      message: '请选择模板源',
-      choices: typeChoices
-    })
-  }
+  // askSource() {
+  //   const typeChoices = ['default', 'remote']
+  //   this._ask.push({
+  //     type: 'list',
+  //     name: 'templateSources',
+  //     message: '请选择模板源',
+  //     choices: typeChoices
+  //   })
+  // }
 
   /**
    * 创建
    */
   async create() {
     try {
-      const { projectName, description, author, template, templateSources } =  await this.clollectAsk()
+      const { projectName, description, author, template } =  await this.clollectAsk()
       typeof projectName !== 'undefined' && (this._name = projectName)
       typeof description !== 'undefined' && (this._description = description )
       typeof author !== 'undefined' && (this._author = author)
-      typeof templateSources !== 'undefined' && (this._templateSource = templateSources)
       typeof template !== 'undefined' && (this._template = template)
-      if (this._templateSource !== 'default') {
-        let repoUrl = await cfg.getGlobalConfig(config.GIT_REPO_URL_KEY)
-        if (repoUrl) {
-          this.downloadTemplate(repoUrl)
-        } else {
-          console.log(symbols.error, chalk.red(config.configErrorEnum.NOT_FOUND_KEY))
-        }
-      }
+      let list = await repo.getTemplatesList()
+      console.log(list)
     } catch(err) {
       console.log(symbols.error, chalk.red(err.message))
     }
@@ -220,8 +208,8 @@ class Creator {
     this.askProjectName()
     this.askDescription()
     this.askAuthor()
-    this.askSource()
-    this.askTemplate()
+    // this.askSource()
+    // this.askTemplate()
     return inquirer.prompt(this._ask)
   }
 

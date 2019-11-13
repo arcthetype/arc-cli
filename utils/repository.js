@@ -8,7 +8,7 @@ const cfg = require('../utils/cfg-tools')
 
 /**
  * 解析<repo>配置信息
- * @param {*} repoValue 
+ * @param {仓库的配置信息} repoValue 
  */
 const parseTemplateDlInfo = (repoValue) => {
   if (!repoValue) return
@@ -21,8 +21,22 @@ const parseTemplateDlInfo = (repoValue) => {
 }
 
 /**
+ * 
+ * @param {托管平台类型} gitType 
+ */
+const composeTemplate = (gitType, list) => {
+  if (gitType == 'github') {
+    return list.map(item => ({
+      name: item.name,
+      value: `${ gitType }:${ item.full_name }`
+    }))
+    // @todo 加入过滤 
+  }
+}
+
+/**
  * 请求方法
- * @param {*} param0 
+ * @param {url, method, loadingInfo, headers} param0 
  */
 const fetch = ({ url, method = 'GET', loadingInfo, headers }) => {
   return new Promise((resolve, reject) => {
@@ -37,16 +51,16 @@ const fetch = ({ url, method = 'GET', loadingInfo, headers }) => {
     (error, response, body) => {
       spinner && spinner.stop()
       if (error) reject(error)
-      resolve(body)
+      response.statusCode === 200 && resolve(body)
     })
   })
 }
 
 /**
  * 获取代码
- * @param {*} repo 
- * @param {*} des 
- * @param {*} opts 
+ * @param {仓库} repo 
+ * @param {下载的临时路径} des 
+ * @param {配置} opts 
  */
 const getGitCode = (repo, des, opts) => {
   return new Promise((resolve, reject) => {
@@ -78,7 +92,7 @@ const getTemplatesList = () => {
         }
       }
       fetch(params).then(result => {
-        result && resolve(result)
+        result && resolve(composeTemplate(info.gitType, result))
       })
     }).catch(() => {
       reject(new Error('获取模板列表失败'))

@@ -14,7 +14,7 @@ const repo = require('../../utils/repository')
  */
 class Creator {
 
-  constructor({ name, description, author, template, root }) {
+  constructor({ name, description, author, root }) {
     /**
      * 项目根目录
      * @type {String}
@@ -39,12 +39,6 @@ class Creator {
      * @private
      */
     this._author = author
-    /**
-     * 模板类型
-     * @type {String}
-     * @private
-     */
-    this._template = template
     /**
      * 用于询问的列表
      * @type {Array}
@@ -124,59 +118,27 @@ class Creator {
   /**
    * 询问模板
    */
-  async askTemplate() {
-    
-    const typeChoices = [
-      {
-        name: 'vue-pc',
-        value: 'archetype-vue-pc'
-      },
-      {
-        name: 'vue-app',
-        value: 'archetype-vue-app'
-      },
-      {
-        name: 'vue-admin',
-        value: 'archetype-vue-admin'
-      },
-      {
-        name: 'weapp',
-        value: 'archetype-weapp'
-      }
-    ]
-    this._ask.push({
+  askTemplate(list) {
+    return inquirer.prompt([{
       type: 'list',
       name: 'template',
       message: '请选择项目模板',
-      choices: typeChoices
-    })
+      choices: list
+    }])
   }
-
-  /**
-   * 询问模板源
-   */
-  // askSource() {
-  //   const typeChoices = ['default', 'remote']
-  //   this._ask.push({
-  //     type: 'list',
-  //     name: 'templateSources',
-  //     message: '请选择模板源',
-  //     choices: typeChoices
-  //   })
-  // }
 
   /**
    * 创建
    */
   async create() {
     try {
-      const { projectName, description, author, template } =  await this.clollectAsk()
+      const { projectName, description, author } =  await this.clollectAsk()
       typeof projectName !== 'undefined' && (this._name = projectName)
       typeof description !== 'undefined' && (this._description = description )
       typeof author !== 'undefined' && (this._author = author)
-      typeof template !== 'undefined' && (this._template = template)
       let list = await repo.getTemplatesList()
-      console.log(list)
+      const { template } = await this.askTemplate(list)
+      this.downloadTemplate(template)
     } catch(err) {
       console.log(symbols.error, chalk.red(err.message))
     }
@@ -193,6 +155,7 @@ class Creator {
       let isSuccess = await repo.getGitCode(repoUrl, des, { clone: false })
       if (isSuccess) {
         spinner.succeed('下载完成').stop()
+        process.exit(0)
       }
     } catch(e) {
       spinner.stop()
@@ -208,8 +171,6 @@ class Creator {
     this.askProjectName()
     this.askDescription()
     this.askAuthor()
-    // this.askSource()
-    // this.askTemplate()
     return inquirer.prompt(this._ask)
   }
 

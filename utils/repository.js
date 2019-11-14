@@ -1,17 +1,10 @@
 const request = require('request')
 const path = require('path')
 const fs = require('fs-extra')
-const util = require('util')
-const rmraf = require('rimraf')
 const downloadUrl = require('download')
-const symbols = require('log-symbols')
-const chalk = require('chalk')
 const ora = require('ora')
-const { DEFAULT_TEMPLATE, GIT_REPO_URL_KEY, CODE_DEST_URL } = require('../config')
+const { DEFAULT_TEMPLATE, GIT_REPO_URL_KEY } = require('../config')
 const cfg = require('../utils/cfg-tools')
-const { getUserHomeDir } = require('../utils')
-
-const rmrafAsync = util.promisify(rmraf)
 
 /**
  * 解析<repo>配置信息
@@ -127,7 +120,7 @@ const getTemplatesList = () => {
  */
 const downloadTemplate = (repoUrl, info, creator) => {
   return new Promise(async (resolve, reject) => {
-    let des = path.join(creator._dest, creator.name)
+    let des = path.join(creator._dest, creator._name)
     const spinner = ora('开始下载模板...').start()
     try {
       let params = {}
@@ -135,13 +128,12 @@ const downloadTemplate = (repoUrl, info, creator) => {
       fs.ensureDirSync(des)
       let isSuccess = await getGitCode(repoUrl, des, params)
       if (isSuccess) {
-        spinner.succeed().stop()
+        spinner.succeed('下载完成').stop()
         resolve(des)
       }
     } catch(e) {
       spinner.stop()
-      console.log(symbols.error, chalk.red('下载模板失败'))
-      process.exit(0)
+      reject(new Error('下载模板失败'))
     }
   })
 }

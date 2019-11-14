@@ -8,9 +8,9 @@ const ora = require('ora')
 const ejs = require('ejs')
 const util = require('util')
 const exec = require('child_process').exec
-const cfg = require('../../utils/cfg-tools')
-const config = require('../../config')
 const repo = require('../../utils/repository')
+const { CODE_DEST_URL } = require('../../config')
+const { getUserHomeDir, gitIsIntalled, npmIsInstalled } = require('../../utils')
 
 const shell = util.promisify(exec)
 
@@ -56,7 +56,7 @@ class Creator {
     /**
      * 远程模板临时下载目录
      */
-    _dest = path.resolve(getUserHomeDir(), CODE_DEST_URL)
+    this._dest = path.resolve(getUserHomeDir(), CODE_DEST_URL)
   }
 
   /**
@@ -158,12 +158,20 @@ class Creator {
         author: this._author
       })
       fs.writeFileSync(npmPkgOld, npmPkgNew, 'utf8')
-      fs.ensureDirSync(this._root)
       let copyDest = path.join(this._root, this._name)
+      fs.ensureDirSync(copyDest)
       fs.copySync(dest, copyDest)
       fs.removeSync(this._dest)
-      const { stdout, stderr } = await shell(`cd ${copyDest}`)
-      if (stderr) return throw new Error(`执行cd ${copyDest} 失败`)
+      const { stderr } = await shell(`cd ${copyDest}`)
+      if (stderr) throw new Error(`执行cd ${copyDest} 失败`)
+      if (gitIsIntalled()) {
+        const spinner = ora('开始下载模板...').start()
+        await shell('git init')
+        spinner.stop()
+        console.log(symbols.success, chalk.green('cd ' + this._name + '\n'))
+        console.log(symbols.success, chalk.green('npm install\n'))
+      }
+      process.exit(0)
     } catch(err) {
       console.log(symbols.error, chalk.red(err.message))
       process.exit(0)

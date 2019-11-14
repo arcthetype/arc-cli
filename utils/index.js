@@ -1,8 +1,7 @@
 const pkg = require('../package.json')
-const chalk = require('chalk')
 const os = require('os')
 const fs = require('fs-extra')
-const exec = require('child_process').execSync
+const { execSync } = require('child_process')
 
 /**
  * 获取版本号
@@ -78,5 +77,7 @@ const npmIsInstalled = async () => {
 module.exports = {
   getPkgVersion,
   getUserHomeDir,
-  isExistHomeDir
+  isExistHomeDir,
+  npmIsInstalled,
+  gitIsIntalled
 }

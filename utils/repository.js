@@ -1,10 +1,17 @@
 const request = require('request')
-const download = require('download-git-repo')
+const path = require('path')
+const fs = require('fs-extra')
+const util = require('util')
+const rmraf = require('rimraf')
+const downloadUrl = require('download')
 const symbols = require('log-symbols')
 const chalk = require('chalk')
 const ora = require('ora')
-const { DEFAULT_TEMPLATE, GIT_REPO_URL_KEY } = require('../config')
+const { DEFAULT_TEMPLATE, GIT_REPO_URL_KEY, CODE_DEST_URL } = require('../config')
 const cfg = require('../utils/cfg-tools')
+const { getUserHomeDir } = require('../utils')
+
+const rmrafAsync = util.promisify(rmraf)
 
 /**
  * 解析<repo>配置信息
@@ -25,13 +32,19 @@ const parseTemplateDlInfo = (repoValue) => {
  * @param {托管平台类型} gitType 
  */
 const composeTemplate = (gitType, list) => {
+  let result = []
   if (gitType == 'github') {
-    return list.map(item => ({
+    result = list.map(item => ({
       name: item.name,
-      value: `${ gitType }:${ item.full_name }`
+      value: `${ item.html_url }/archive/master.zip`
     }))
-    // @todo 加入过滤 
+  } else {
+    result = list.projects.map(item => ({
+      name: item.name, 
+      value: `${item.web_url}/-/archive/master/${item.name}-master.zip`
+    }))
   }
+  return result.filter(item => item.name.search(/project|template/) > -1)
 }
 
 /**
@@ -51,7 +64,7 @@ const fetch = ({ url, method = 'GET', loadingInfo, headers }) => {
     (error, response, body) => {
       spinner && spinner.stop()
       if (error) reject(error)
-      response.statusCode === 200 && resolve(body)
+      response && response.statusCode === 200 && resolve(body)
     })
   })
 }
@@ -64,13 +77,20 @@ const fetch = ({ url, method = 'GET', loadingInfo, headers }) => {
  */
 const getGitCode = (repo, des, opts) => {
   return new Promise((resolve, reject) => {
-    let defaults = {
-      clone: false
+    let downloadOptions = {
+      extract: true,
+      strip: 1,
+      mode: '666',
+      ...opts,
+      headers: {
+        accept: 'application/zip',
+        ...(opts.headers || {})
+      }
     }
-    let options = Object.assign({}, defaults, opts)
-    download(repo, des, options, err => {
-      if (err) reject(err)
+    downloadUrl(repo, des, downloadOptions).then(() => {
       resolve(true)
+    }).catch(err => {
+      reject(err)
     })
   })
 }
@@ -92,7 +112,9 @@ const getTemplatesList = () => {
         }
       }
       fetch(params).then(result => {
-        result && resolve(composeTemplate(info.gitType, result))
+        if (result) {
+          resolve({ list: composeTemplate(info.gitType, result), info })
+        }
       })
     }).catch(() => {
       reject(new Error('获取模板列表失败'))
@@ -100,7 +122,32 @@ const getTemplatesList = () => {
   })
 }
 
+/**
+ * 下载远程模板
+ */
+const downloadTemplate = (repoUrl, info, creator) => {
+  return new Promise(async (resolve, reject) => {
+    let des = path.join(creator._dest, creator.name)
+    const spinner = ora('开始下载模板...').start()
+    try {
+      let params = {}
+      info.gitType === 'gitlab' && (params.headers = { 'PRIVATE-TOKEN': info.privateToken })
+      fs.ensureDirSync(des)
+      let isSuccess = await getGitCode(repoUrl, des, params)
+      if (isSuccess) {
+        spinner.succeed().stop()
+        resolve(des)
+      }
+    } catch(e) {
+      spinner.stop()
+      console.log(symbols.error, chalk.red('下载模板失败'))
+      process.exit(0)
+    }
+  })
+}
+
 module.exports = {
   getGitCode,
-  getTemplatesList
+  getTemplatesList,
+  downloadTemplate
 }

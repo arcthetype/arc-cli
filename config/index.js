@@ -32,11 +32,6 @@ const CODE_DEST_URL = '.archetype/remote'
  */
 const DEFAULT_TEMPLATE = 'github::https://api.github.com::arcthetype'
 
-/**
- * 用于过滤仓库的子串
- */
-const FILTER_GROUP_REPO = 'templates'
-
 module.exports.configErrorEnum = configErrorEnum
 module.exports.HOME_CONFIG_DIR = HOME_CONFIG_DIR
 module.exports.GIT_REPO_URL_KEY = GIT_REPO_URL_KEY

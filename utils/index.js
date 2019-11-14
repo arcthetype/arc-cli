@@ -2,6 +2,7 @@ const pkg = require('../package.json')
 const chalk = require('chalk')
 const os = require('os')
 const fs = require('fs-extra')
+const exec = require('child_process').execSync
 
 /**
  * 获取版本号
@@ -48,6 +49,30 @@ const getUserHomeDir  = () => {
  */
 const isExistHomeDir = () => {
   return fs.existsSync(getUserHomeDir())
+}
+
+/**
+ * 判断是否安装git
+ */
+const gitIsIntalled = () => {
+  try {
+    execSync('git --version', { stdio: 'ignore' })
+    return true 
+  } catch(err) {
+    return false
+  }
+}
+
+/**
+ * 判断是否安装npm
+ */
+const npmIsInstalled = async () => {
+  try {
+    execSync('npm -v', { stdio: 'ignore' })
+    return true 
+  } catch(err) {
+    return false
+  }
 }
 
 module.exports = {

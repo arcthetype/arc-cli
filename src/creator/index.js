@@ -1,20 +1,28 @@
 const inquirer = require('inquirer')
 const symbols = require('log-symbols')
 const chalk = require('chalk')
-const fs = require('fs-extra')
-const ora = require('ora')
 const path = require('path')
+const fs = require('fs-extra')
+const semver = require('semver')
+const ora = require('ora')
+const ejs = require('ejs')
+const util = require('util')
+const exec = require('child_process').exec
 const cfg = require('../../utils/cfg-tools')
-const { getUserHomeDir } = require('../../utils')
 const config = require('../../config')
 const repo = require('../../utils/repository')
+
+const shell = util.promisify(exec)
 
 /**
  * 创建工程的类
  */
 class Creator {
-
   constructor({ name, description, author, root }) {
+    const unSupportedVer = semver.lt(process.version, 'v7.6.0')
+    if (unSupportedVer) {
+      throw new Error('Node.js 版本过低，推荐升级 Node.js 至 v8.0.0+')
+    }
     /**
      * 项目根目录
      * @type {String}
@@ -44,7 +52,11 @@ class Creator {
      * @type {Array}
      * @private
      */
-    this._ask = []
+    this._ask = [],
+    /**
+     * 远程模板临时下载目录
+     */
+    _dest = path.resolve(getUserHomeDir(), CODE_DEST_URL)
   }
 
   /**
@@ -134,32 +146,26 @@ class Creator {
     try {
       const { projectName, description, author } =  await this.clollectAsk()
       typeof projectName !== 'undefined' && (this._name = projectName)
-      typeof description !== 'undefined' && (this._description = description )
+      typeof description !== 'undefined' && (this._description = description)
       typeof author !== 'undefined' && (this._author = author)
-      let list = await repo.getTemplatesList()
-      const { template } = await this.askTemplate(list)
-      this.downloadTemplate(template)
+      let result = await repo.getTemplatesList()
+      const { template } = await this.askTemplate(result.list)
+      let dest = await repo.downloadTemplate(template, result.info, this)
+      let npmPkgOld = path.join(dest, 'package.json')
+      let npmPkgNew = await ejs.renderFile(npmPkgOld, {
+        projectName: this._name,
+        description: this._description,
+        author: this._author
+      })
+      fs.writeFileSync(npmPkgOld, npmPkgNew, 'utf8')
+      fs.ensureDirSync(this._root)
+      let copyDest = path.join(this._root, this._name)
+      fs.copySync(dest, copyDest)
+      fs.removeSync(this._dest)
+      const { stdout, stderr } = await shell(`cd ${copyDest}`)
+      if (stderr) return throw new Error(`执行cd ${copyDest} 失败`)
     } catch(err) {
       console.log(symbols.error, chalk.red(err.message))
-    }
-  }
-
-  /**
-   * 下载远程模板
-   */
-  async downloadTemplate(repoUrl) {
-    let des = path.resolve(getUserHomeDir(), config.CODE_DEST_URL)
-    const spinner = ora('开始下载模板').start()
-    try {
-      fs.ensureDirSync(des)
-      let isSuccess = await repo.getGitCode(repoUrl, des, { clone: false })
-      if (isSuccess) {
-        spinner.succeed('下载完成').stop()
-        process.exit(0)
-      }
-    } catch(e) {
-      spinner.stop()
-      console.log(symbols.error, chalk.red('下载模板失败'))
       process.exit(0)
     }
   }

@@ -2,10 +2,8 @@ const path = require('path')
 const fs = require('fs-extra')
 const chalk = require('chalk')
 const symbols = require('log-symbols')
-const getUserHomeDir = require('./index').getUserHomeDir
-const isExistHomeDir = require('./index').isExistHomeDir
-const HOME_CONFIG_DIR = require('../config').HOME_CONFIG_DIR
-const configErrorEnum = require('../config').configErrorEnum
+const { getUserHomeDir, isExistHomeDir } = require('./index')
+const { configErrorEnum, HOME_CONFIG_DIR } = require('../config')
 
 let globalFilePath = path.resolve(getUserHomeDir(), HOME_CONFIG_DIR)
 
@@ -39,7 +37,7 @@ const getGlobalConfig = (key, isAll = false) => {
  * @param value
  */
 const setGlobalConfig = (key, value) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       if (!isExistHomeDir()) reject(new Error(configErrorEnum.NOT_FOUND_HOME))
       if (fs.existsSync(globalFilePath)) {

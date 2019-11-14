@@ -13,5 +13,4 @@ const name = program.args[0]
 const { description, author, template } = program
 
 const creator = new Creator({ name, description, author, root: process.cwd() })
-
 creator.create()

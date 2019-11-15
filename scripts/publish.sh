@@ -12,9 +12,7 @@ then
   then
   npm test
   fi
-  git add .
-  git commit -m '发布 $VERSION' > /dev/null 2>&1
   npm version $VERSION -m "发布 $VERSION" --allow-same-version;
-  # npm publish
+  npm publish
 fi
 

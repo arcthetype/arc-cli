@@ -1,20 +1,35 @@
 {
   "name": "arc-cli",
   "version": "1.0.0",
-  "description": "create a vue project quickly",
+  "description": "create a project quickly",
+  "private": true,
   "main": "index.js",
   "bin": {
     "arc": "bin/arc.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "deploy": "sh scripts/publish.sh"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "files": [
+    "bin",
+    "__test__",
+    "config",
+    "src",
+    "utils",
+    "index.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/HRDVV/arc-cli.git"
   },
   "keywords": [
-    "vue",
+    "templates",
     "node"
   ],
   "author": "HRDVV",
@@ -35,5 +50,15 @@
     "request": "^2.88.0",
     "rimraf": "^3.0.0",
     "semver": "^6.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "babel-jest": "^24.9.0",
+    "husky": "^3.0.9",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "pretty-quick": "^2.0.1",
+    "regenerator-runtime": "^0.13.3"
   }
 }

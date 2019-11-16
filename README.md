@@ -1,14 +1,15 @@
-<p>
+<p align="center">
   <img src="https://avatars1.githubusercontent.com/u/57614327?s=200&v=4" width="150" height="150"/></p>
-<p style="text-align: center">
+<p align="center">
   <img src="https://www.travis-ci.org/arcthetype/arc-cli.svg?branch=master" />
   <img src="https://scrutinizer-ci.com/g/arcthetype/arc-cli/badges/quality-score.png?b=master" />
   <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/arcthetype/arc-cli" />
   <img src="https://img.shields.io/badge/node-%3E%3D7.6.0-brightgreen" />
   <img alt="GitHub" src="https://img.shields.io/github/license/arcthetype/arc-cli" />
 </p>
+------
 
-###快速搭建项目的工具
+### 快速搭建项目的工具
 
 - [x] 支持github以组织的形式维护模板， 仓库名以-project或-template为后缀
 - [x] 支持gitlab以组的形式维护模板，仓库名以-project或-template为后缀

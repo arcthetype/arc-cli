@@ -39,9 +39,9 @@ arc config flushall
 arc create [projectName]
 
 # 配置自己的模板源
-# github  [托管平台]::[api地址]::[组织个人用户名]
+# github  [托管平台]::[api地址]::[组织名]
 arc config set repo github::https://api.github.com::arcthetype
-# gitlab [托管平台]::[api地址]::[组名或个人用户名]::[private_token]
+# gitlab [托管平台]::[api地址]::[组名]::[private_token]
 arc config set repo gitlab::[公司或个人的gitlab域名]::arcthetype::[private_token]
 ```
 

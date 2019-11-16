@@ -2,7 +2,6 @@
   "name": "arc-tool",
   "version": "1.0.0-beta.1",
   "description": "create a project quickly",
-  "private": true,
   "main": "index.js",
   "bin": {
     "arc": "bin/arc.js"

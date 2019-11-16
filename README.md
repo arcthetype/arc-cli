@@ -7,7 +7,6 @@
   <img src="https://img.shields.io/badge/node-%3E%3D7.6.0-brightgreen" />
   <img alt="GitHub" src="https://img.shields.io/github/license/arcthetype/arc-cli" />
 </p>
-------
 
 ### 快速搭建项目的工具
 
@@ -16,6 +15,11 @@
 - [ ] 项目中不包含本地模板，将提供默认模板与[github](https://github.com/arcthetype)
 - [ ] 暂不支持打包，构建等
 - [ ] 。。。
+
+### 安装
+```shell
+npm i -g arc-tool
+```
 
 ### 支持以下命令
 

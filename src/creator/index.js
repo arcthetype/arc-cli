@@ -162,14 +162,18 @@ class Creator {
       fs.ensureDirSync(copyDest)
       fs.copySync(dest, copyDest)
       fs.removeSync(this._dest)
-      const { stderr } = await shell(`cd ${copyDest}`)
-      if (stderr) throw new Error(`执行cd ${copyDest} 失败`)
+      // const { stderr } = await shell(`cd ${copyDest} & git init`)
+      // if (stderr) throw new Error(`执行cd ${copyDest} 失败`)
+      process.chdir(copyDest)
       if (gitIsIntalled()) {
-        const spinner = ora('开始下载模板...').start()
+        const spinner = ora('初始化项目中...').start()
         await shell('git init')
-        spinner.stop()
-        console.log(symbols.success, chalk.green('cd ' + this._name + '\n'))
-        console.log(symbols.success, chalk.green('npm install\n'))
+        spinner.succeed('初始化成功').stop()
+        console.log(`
+          $ ${chalk.green('cd ' + this._name)}
+          $ ${chalk.green('npm install\n')}
+          `
+        )
       }
       process.exit(0)
     } catch(err) {

@@ -128,7 +128,7 @@ const downloadTemplate = (repoUrl, info, creator) => {
       fs.ensureDirSync(des)
       let isSuccess = await getGitCode(repoUrl, des, params)
       if (isSuccess) {
-        spinner.succeed('下载完成').stop()
+        spinner.stop()
         resolve(des)
       }
     } catch(e) {

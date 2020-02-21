@@ -13,10 +13,11 @@ const cfg = require('../utils/cfg-tools')
 const parseTemplateDlInfo = (repoValue) => {
   if (!repoValue) return
   return {
-    api: repoValue.split('::')[1],
-    groupName: repoValue.split('::')[2],
-    gitType: repoValue.split('::')[0],
-    privateToken: repoValue.split('::')[3]
+    api: repoValue.split('::')[2],
+    groupName: repoValue.split('::')[3],
+    gitType: repoValue.split('::')[1],
+    privateToken: repoValue.split('::')[4],
+    getType: repoValue.split('::')[0]
   }
 }
 
@@ -29,12 +30,14 @@ const composeTemplate = (gitType, list) => {
   if (gitType == 'github') {
     result = list.map(item => ({
       name: item.name,
-      value: `${ item.html_url }/archive/master.zip`
+      value: `${ item.html_url }/archive/master.zip`,
+      repo: `${item.html_url}.git`
     }))
   } else {
     result = list.projects.map(item => ({
       name: item.name, 
-      value: `${item.web_url}/-/archive/master/${item.name}-master.zip`
+      value: `${item.web_url}/-/archive/master/${item.name}-master.zip`,
+      repo: item.http_url_to_repo
     }))
   }
   return result.filter(item => item.name.search(/project|template/) > -1)
@@ -109,15 +112,15 @@ const getTemplatesList = () => {
           resolve({ list: composeTemplate(info.gitType, result), info })
         }
       })
-    }).catch(() => {
-      reject(new Error('获取模板列表失败'))
+    }).catch((err) => {
+      reject(err.message || '获取模板列表失败')
     })
   })
 }
 
 /**
  * 下载远程模板
- */
+ */ 
 const downloadTemplate = (repoUrl, info, creator) => {
   return new Promise(async (resolve, reject) => {
     let des = path.join(creator._dest, creator._name)

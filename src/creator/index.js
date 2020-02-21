@@ -150,7 +150,23 @@ class Creator {
       typeof author !== 'undefined' && (this._author = author)
       let result = await repo.getTemplatesList()
       const { template } = await this.askTemplate(result.list)
-      let dest = await repo.downloadTemplate(template, result.info, this)
+      let dest
+      if (result.info.getType === 'clone') {
+        dest = path.join(this._dest, this._name)
+        let isHaveGit = gitIsIntalled()
+        if (!isHaveGit) {
+          throw new Error('请安装git')
+        }
+        let gitUrl = result.list.filter(item => {
+          return item.value == template
+        })[0].repo
+        const spinner = ora('clone项目中...').start()
+        await shell(`git clone ${gitUrl} ${dest}`)
+        spinner.succeed('clone成功').stop()
+
+      } else {
+        dest = await repo.downloadTemplate(template, result.info, this)
+      }
       let npmPkgOld = path.join(dest, 'package.json')
       let npmPkgNew = await ejs.renderFile(npmPkgOld, {
         projectName: this._name,
@@ -177,6 +193,7 @@ class Creator {
       }
       process.exit(0)
     } catch(err) {
+      console.log(err)
       console.log(symbols.error, chalk.red(err.message))
       process.exit(0)
     }

@@ -39,13 +39,11 @@ arc config flushall
 arc create [projectName]
 
 # 配置自己的模板源
-# github  [托管平台]::[api地址]::[组织名]
-arc config set repo github::https://api.github.com::arcthetype
+# github  [获取代码方式clone，download]::[托管平台]::[api地址]::[组织名]
+arc config set repo clone::github::https://api.github.com::arcthetype
 # gitlab [托管平台]::[api地址]::[组名]::[private_token]
-arc config set repo gitlab::[公司或个人的gitlab域名]::arcthetype::[private_token]
+arc config set repo clone::gitlab::[公司或个人的gitlab域名]::arcthetype::[private_token]
 ```
-
-
 
 MIT License
 

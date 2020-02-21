@@ -163,7 +163,6 @@ class Creator {
         const spinner = ora('clone项目中...').start()
         await shell(`git clone ${gitUrl} ${dest}`)
         spinner.succeed('clone成功').stop()
-
       } else {
         dest = await repo.downloadTemplate(template, result.info, this)
       }
